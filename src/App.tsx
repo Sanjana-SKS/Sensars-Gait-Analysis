@@ -4,7 +4,7 @@ import viteLogo from '/vite.svg';
 import './App.css';
 
 // Import Firebase (initializes on import)
-import app from './firebase/firebaseConfig';
+import { app } from './firebase/firebaseConfig';
 
 function App() {
   const [count, setCount] = useState(0);
