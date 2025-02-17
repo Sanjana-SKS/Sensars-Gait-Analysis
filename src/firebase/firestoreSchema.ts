@@ -1,83 +1,123 @@
-// Firestore Database Structure Implementation
+import * as admin from "firebase-admin";
 
-// Firestore Database Schema
-export const collections = {
-    clinicians: "clinicians",
-    patients: "patients",
-    externalControllers: "external_controllers",
-    implantablePulseGenerators: "implantable_pulse_generators",
-    sensorSets: "sensor_sets"
-};
+// Load Firebase Service Account Key
+import * as serviceAccount from "./firebase-admin-key.json"; // Update path
 
-// Collection: clinicians
-const clinicians = {
-    clinicianId: "unique_clinician_id",
-    name: "Clinician Name",
-    email: "clinician@example.com",
-    password: "hashed_password", // Never store plain-text passwords
-    patients: ["patients/patientId1", "patients/patientId2"] // References to patient documents
-};
+// Initialize Firebase Admin SDK
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+});
 
-// Collection: patients
-const patients = {
-    patientId: "unique_patient_id",
-    name: "Patient Name",
-    dob: "YYYY-MM-DD",
-    email: "patient@example.com",
-    password: "hashed_password",
-    clinicianId: "clinicians/unique_clinician_id", // Reference to clinician document
-    ec: "external_controllers/ec_id", // Reference to External Controller
-    ipg: "implantable_pulse_generators/ipg_id", // Reference to Implantable Pulse Generator
-    sensors: ["sensor_sets/sensorSetId1", "sensor_sets/sensorSetId2"], // References to sensor sets
-    gaitData: [] // Subcollection for continuous gait data
-};
+const db = admin.firestore();
 
-// Collection: external_controllers
-const externalControllers = {
-    ecId: "unique_ec_id",
-    patientId: "patients/unique_patient_id", // Reference to patient document
-    model: "EC Model",
-    status: "active", // e.g., active, inactive, charging
-    battery: 85, // Battery percentage
-    lastSync: "Timestamp"
-};
+// Define TypeScript Interfaces for Firestore Schema
+interface Clinician {
+  name: string;
+  email: string;
+  password: string;
+  patients: string[]; // Array of patient IDs
+}
 
-// Collection: implantable_pulse_generators
-const implantablePulseGenerators = {
-    ipgId: "unique_ipg_id",
-    patientId: "patients/unique_patient_id", // Reference to patient document
-    model: "IPG Model",
-    status: "active", // e.g., active, inactive
-    battery: 90, // Battery percentage
-    lastSync: "Timestamp"
-};
+interface Patient {
+  name: string;
+  dob: string;
+  email: string;
+  password: string;
+  clinicianId: string;
+  ec: string;
+  ipg: string;
+  sensors: string[];
+}
 
-// Collection: sensor_sets
-const sensorSets = {
-    sensorSetId: "unique_sensor_set_id",
-    patientId: "patients/unique_patient_id", // Reference to patient document
-    type: "left leg", // Type of sensor
-    sensorDetails: {
-      pressure: true,
-      temperature: true,
-      gyroscope: true
-    },
-    lastSync: "Timestamp"
-};
+interface ExternalController {
+  patientId: string;
+  model: string;
+  status: string;
+  battery: number;
+  lastSync: FirebaseFirestore.Timestamp;
+}
 
-// Subcollection: gaitData (Inside each patient document)
-const gaitData = {
-    gaitDataId: "unique_gait_data_id",
-    sensorSetId: "sensor_sets/unique_sensor_set_id", // Reference to sensor set document
-    timestamp: "Timestamp",
-    gaitMetrics: {
-      velocity: 1.2,
-      cadence: 120,
-      strideLength: 1.5,
-      pressure: 50,
-      symmetry: 95
-    },
-    status: "uploaded" // e.g., uploaded, processing
-};
+interface ImplantablePulseGenerator {
+  patientId: string;
+  model: string;
+  status: string;
+  battery: number;
+  lastSync: FirebaseFirestore.Timestamp;
+}
 
-export { clinicians, patients, externalControllers, implantablePulseGenerators, sensorSets, gaitData };
+interface SensorSet {
+  patientId: string;
+  type: string;
+  sensorDetails: Record<string, boolean>; // Example: { pressure: true, temperature: true }
+  lastSync: FirebaseFirestore.Timestamp;
+}
+
+interface GaitData {
+  sensorSetId: string;
+  timestamp: FirebaseFirestore.Timestamp;
+  gaitMetrics: Record<string, number | string>; // Example: { velocity: 1.2, cadence: 110 }
+  status: string;
+}
+
+// Function to Initialize Firestore Schema
+async function createSchema(): Promise<void> {
+  try {
+    // Define Collections with Dummy Documents to Set Schema
+    await db.collection("clinicians").doc("schema").set({
+      name: "",
+      email: "",
+      password: "",
+      patients: [],
+    } as Clinician);
+
+    await db.collection("patients").doc("schema").set({
+      name: "",
+      dob: "",
+      email: "",
+      password: "",
+      clinicianId: "",
+      ec: "",
+      ipg: "",
+      sensors: [],
+    } as Patient);
+
+    await db.collection("external_controllers").doc("schema").set({
+      patientId: "",
+      model: "",
+      status: "",
+      battery: 0,
+      lastSync: admin.firestore.Timestamp.now(),
+    } as ExternalController);
+
+    await db.collection("implantable_pulse_generators").doc("schema").set({
+      patientId: "",
+      model: "",
+      status: "",
+      battery: 0,
+      lastSync: admin.firestore.Timestamp.now(),
+    } as ImplantablePulseGenerator);
+
+    await db.collection("sensor_sets").doc("schema").set({
+      patientId: "",
+      type: "",
+      sensorDetails: {},
+      lastSync: admin.firestore.Timestamp.now(),
+    } as SensorSet);
+
+    // Create a Subcollection Inside "patients" for Gait Data
+    const gaitDataRef = db.collection("patients").doc("schema").collection("gaitData");
+    await gaitDataRef.doc("schema").set({
+      sensorSetId: "",
+      timestamp: admin.firestore.Timestamp.now(),
+      gaitMetrics: {},
+      status: "",
+    } as GaitData);
+
+    console.log("Firestore schema initialized successfully!");
+  } catch (error) {
+    console.error("Error creating schema:", error);
+  }
+}
+
+// Run Schema Setup
+createSchema();
