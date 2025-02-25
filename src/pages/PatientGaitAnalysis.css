@@ -1,0 +1,327 @@
+/* PatientGaitAnalysis.css */
+
+/* Basic resets */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* 
+  Outer container: 
+  just handles the page background and overall spacing
+*/
+.pga__container {
+  background-color: #f3f3f3; /* Light greyish background */
+  min-height: 100vh;
+  padding: 10px;
+}
+
+/* 
+  Inner content container: 
+  This is the main white "card" that holds tabs + content
+*/
+.pga__content-container {
+  max-width: 900px;
+  max-height: 90%;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 2px 3px 20px rgba(0,0,0,0.1);
+  /* Add some vertical spacing so the tabs have room to breathe */
+  padding: 20px;
+}
+
+/* Header / Navbar */
+.pga__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.pga__back-button {
+  background: none;
+  border: none;
+  color: #4a4a4a;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.pga__title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.pga__patient-btn {
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #0f2338;
+}
+
+/* Tabs */
+.pga__tabs {
+  display: flex;
+  margin-bottom: 16px; /* More space under tabs */
+}
+
+/* 
+  Tab buttons: 
+  Use a lighter gray for inactive state, highlight active with a bottom border
+*/
+.pga__tab-btn {
+  border: none;
+  background-color: #eff0f1;
+  padding: 10px 16px;
+  cursor: pointer;
+  color: #585f66;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background-color 0.2s;
+  border-radius: 4px 4px 0 0; /* Slight rounding on top corners */
+  margin-right: 4px;
+}
+
+.pga__tab-btn.active {
+  background-color: #dee0e0;
+  color: #222528;
+  font-weight: 600;
+  border-bottom: 2px solid #484848; /* Emphasize active tab */
+}
+
+.pga__tab-btn:hover {
+  background-color: #d8d9da;
+}
+
+/* 
+  The "data" panel: 
+  We remove extra background/shadow so it blends into the .pga__content-container
+*/
+.pga__data-panel {
+  padding: 13px;
+}
+
+/* Gait Data header row (title + "Today" dropdown) */
+.pga__data-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 19px;
+}
+
+.pga__data-header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #444;
+}
+
+/* "Today" as a dropdown */
+.pga__dropdown {
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  color: #495057;
+  font-size: 14px;
+}
+
+/* Metrics container */
+.pga__metrics {
+  margin-bottom: 14px;
+}
+
+/* Each row for one gait metric */
+.pga__metric-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.pga__metric-name {
+  width: 200px;
+  font-size: 18px;
+  color: #495057;
+  font-weight: 550;
+  text-transform: capitalize;
+}
+
+/* The color-coded bar area */
+.pga__bar-wrapper {
+  flex: 1;
+  margin: 0 16px;
+  position: relative;
+}
+
+.pga__bar-bg {
+  position: relative;
+  height: 24px;
+  border-radius: 12px;
+  background: linear-gradient(
+    to right,
+    #DC2020 0%,
+    #F3B53E 20%,
+    #489F32 50%,
+    #F3B53E 80%,
+    #DC2020 100%
+  );
+}
+
+/* The marker for "Patient's Value" */
+.pga__bar-marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.pga__bar-marker-circle {
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+  border: 2px solid #3A6470;
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+/* Tooltip on hover */
+.pga__bar-marker-tooltip {
+  position: absolute;
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 12px;
+  color: #333;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+.pga__bar-marker-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #ccc transparent transparent transparent;
+}
+
+.pga__bar-marker-tooltip::before {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #fff transparent transparent transparent;
+}
+
+.pga__bar-marker:hover .pga__bar-marker-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+  pointer-events: auto;
+}
+
+/* Min/Max labels below the bar */
+.pga__bar-labels {
+  position: absolute;
+  bottom: -18px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.pga__min-value {
+  margin-left: 4px;
+}
+.pga__max-value {
+  margin-right: 4px;
+}
+
+/* Show Evolution button */
+.pga__show-evolution {
+  background-color: #3A6470;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.pga__show-evolution:hover {
+  background-color: #034458;
+}
+
+.pga__chevron {
+  margin-left: 4px;
+  font-size: 12px;
+}
+
+/* Bottom "Analyze" button: now a primary-style button */
+.pga__analyze-btn {
+  display: block;
+  margin: 0 auto;
+  margin-top: 20px;
+  background-color: #3A6470;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 16px;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.pga__analyze-btn:hover {
+  background-color: #034458;
+}
+
+/* Therapy Suggestions tab content */
+.pga__therapy-panel {
+  /* Remove extra card styling so it matches data panel */
+  padding: 16px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .pga__metric-name {
+    width: auto;
+  }
+  .pga__show-evolution {
+    align-self: flex-end;
+  }
+}
