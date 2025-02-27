@@ -61,9 +61,6 @@ const PatientGaitAnalysis: React.FC = () => {
             {/* Panel header: "Gait Data" + "Today" dropdown */}
             <div className="pga__data-header">
               <h2>Gait Data</h2>
-              <div className="pga__dropdown">
-                Today <span className="pga__chevron">&#9662;</span>
-              </div>
             </div>
 
             {/* Metrics list */}
@@ -97,7 +94,7 @@ const PatientGaitAnalysis: React.FC = () => {
                     className="pga__show-evolution"
                     onClick={() => handleShowEvolution(metric.name)}
                   >
-                    Show Evolution <span className="pga__chevron">&#9662;</span>
+                    Show Evolution 
                   </button>
                 </div>
               ))}
