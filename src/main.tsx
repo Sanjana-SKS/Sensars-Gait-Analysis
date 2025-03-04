@@ -7,6 +7,7 @@ import PatientGaitAnalysis from './pages/PatientGaitAnalysis';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Patients from './pages/Patients';
+import Login from './pages/Login';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
@@ -14,12 +15,13 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       <Routes>
         <Route path="/" element={<App />}>
           {/* Redirect the root path to /Home */}
-          <Route index element={<Navigate to="Home" replace />} />
+          <Route index element={<Navigate to="Login" replace />} />
           <Route path="PatientGaitAnalysis" element={<PatientGaitAnalysis />} />
           <Route path="Home" element={<Home />}>
             <Route path="Dashboard" element={<Dashboard />} />
             <Route path="Patients" element={<Patients />} />
           </Route>
+          <Route path="Login" element={<Login />} />
         </Route>
       </Routes>
     </BrowserRouter>
