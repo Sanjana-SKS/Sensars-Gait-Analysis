@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './PatientGaitAnalysis.css';
+import backIcon from '../Assets/left.png';
 
 interface GaitMetric {
   id: number;
@@ -38,8 +39,9 @@ const PatientGaitAnalysis: React.FC = () => {
     <div className="pga__container">
       {/* Header / Navbar */}
       <div className="pga__header">
-      <button className="pga__back-button" onClick={handleBack}>
-          &larr; Back
+        <button className="pga__back-button" onClick={handleBack}>
+          <img src={backIcon} alt="Back" className="pga__back-icon" />
+          Back
         </button>
         <h1 className="pga__title">Patient Gait Analysis</h1>
         <button className="pga__patient-btn">Patient no.</button>
@@ -117,7 +119,9 @@ const PatientGaitAnalysis: React.FC = () => {
 
         {activeTab === 'therapy' && (
           <div className="pga__therapy-panel">
-            <h2>Therapy Suggestions</h2>
+            <div className="pga__data-header">
+              <h2>Therapy Suggestions</h2>
+            </div>
             <p>Here you can list therapy suggestions…</p>
           </div>
         )}
