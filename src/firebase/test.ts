@@ -1,9 +1,6 @@
 const admin = require("firebase-admin");
 
 // Initialize Firebase Admin SDK
-const app = admin.initializeApp({
-    projectId: "your-test-project",  // Replace with your actual test project ID
-});
 const db = admin.firestore();
 
 // Ensure Firestore Emulator is used
