@@ -316,7 +316,8 @@ body, html {
 }
 
 .pga__analyze-btn:hover {
-  background-color: #034458;
+  background-color: #3A6470;
+  color: #EEF3F4;
 }
 
 /* Therapy Suggestions tab content */
