@@ -22,7 +22,6 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Only top padding here */
   padding-top: 20px; 
   gap: 15px;
   height: 100vh;
@@ -157,4 +156,14 @@ body {
 /* Remove focus outline for a cleaner look */
 .logout-button:focus {
   outline: none;
+}
+
+/* Match the same opacity behavior for the logout text */
+.logout-button .nav-text {
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.logout-button:hover .nav-text {
+  opacity: 1;
 }
