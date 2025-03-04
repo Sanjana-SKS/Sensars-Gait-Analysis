@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './PatientGaitAnalysis.css';
 
 interface GaitMetric {
@@ -23,6 +24,11 @@ const initialGaitMetrics: GaitMetric[] = [
 
 const PatientGaitAnalysis: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'data' | 'therapy'>('data');
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    navigate("/Home");
+  };
 
   const handleShowEvolution = (metricName: string) => {
     alert(`Show evolution for: ${metricName}`);
@@ -32,7 +38,9 @@ const PatientGaitAnalysis: React.FC = () => {
     <div className="pga__container">
       {/* Header / Navbar */}
       <div className="pga__header">
-        <button className="pga__back-button">&larr; Back</button>
+      <button className="pga__back-button" onClick={handleBack}>
+          &larr; Back
+        </button>
         <h1 className="pga__title">Patient Gait Analysis</h1>
         <button className="pga__patient-btn">Patient no.</button>
       </div>

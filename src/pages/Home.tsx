@@ -54,6 +54,17 @@ const Home: React.FC = () => {
               </div>
             </NavLink>
           </li>
+          <li>
+            <NavLink
+              to="/PatientGaitAnalysis"
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
+              <div className="nav-item">
+                <img src="src/assets/stats.png" alt="Data Icon" className="icon" />
+                <span className="nav-text">Data Visualization</span>
+              </div>
+            </NavLink>
+          </li>
           {/* Push the logout button to the bottom */}
           <li className="logout-item">
             <button onClick={handleLogout} className="logout-button">

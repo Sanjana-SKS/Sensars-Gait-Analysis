@@ -1,108 +1,280 @@
+/* ---------------------------------------
+   Global Layout
+--------------------------------------- */
 body {
-    margin: 0;
-    font-family: system-ui;
-    background-color: #f8f9fa;
-  }
-  
-  .app-container {
-    display: flex;
-    height: 100vh;
-  }
-  
-  .sidebar {
-    width: 100px;
-    background-color: #375A65;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 0;
-    gap: 15px;
-  }
-  
-  .sidebar ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-  }
-  
-  .sidebar li {
-    display: flex;
-    justify-content: center;
-    padding: 5px 0;
-    width: 100%;
-  }
-  
-  .sidebar a {
-    color: white;
-    text-decoration: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 14px;
-    transition: background 0.3s;
-    padding: 10px;
-    width: 85px;
-    text-align: center;
-    border-radius: 10px;
-    margin: 5px;
-  }
-  
-  .sidebar a .nav-text {
-    opacity: 0.6;
-    transition: opacity 0.3s;
-  }
-  
-  .sidebar a.active .nav-text,
-  .sidebar a:hover .nav-text {
-    opacity: 1;
-  }
-  
-  .sidebar a.active {
-    background-color: #4D7C8A;
-    border-radius: 10px;
-    padding: 10px;
-  }
-  
-  .sidebar a:hover {
-    background-color: #3B6A76;
-    padding: 10px;
-  }
-  
-  .nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    width: 100%;
-  }
-  
-  .icon {
-    width: 30px;
-    height: 30px;
-    margin-bottom: 3px;
-  }
-  
-  .nav-text {
-    font-size: 12px;
-    text-align: center;
-  }
-  
-  .main-content {
-    flex-grow: 1;
-    padding: 10px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-  }
-  
-  .page-title {
-    color: #253228;
-    font-weight: bold;
-    margin-top: 0px;
-    padding-top: 10px;
-    padding-left: 20px;
-  }
-  
+  margin: 0;
+  font-family: system-ui;
+  background-color: white;
+}
+
+.app-container {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 100px;
+  background-color: #375A65;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  gap: 15px;
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.sidebar li {
+  display: flex;
+  justify-content: center;
+  padding: 5px 0;
+  width: 100%;
+}
+
+.sidebar a {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 14px;
+  transition: background 0.3s;
+  padding: 10px;
+  width: 85px;
+  text-align: center;
+  border-radius: 10px;
+  margin: 5px;
+}
+
+.sidebar a .nav-text {
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.sidebar a.active .nav-text,
+.sidebar a:hover .nav-text {
+  opacity: 1;
+}
+
+.sidebar a.active {
+  background-color: #4D7C8A;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.sidebar a:hover {
+  background-color: #3B6A76;
+  padding: 10px;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+}
+
+.icon {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 3px;
+}
+
+.nav-text {
+  font-size: 12px;
+  text-align: center;
+}
+
+/* The main content area to the right of the sidebar */
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 30px; /* More spacing around the content */
+}
+
+.page-title {
+  color: #253228;
+  font-weight: bold;
+  margin-top: 0px;
+  padding-top: 10px;
+  padding-left: 5px;
+  font-size: 32px;
+}
+
+/* ---------------------------------------
+   Patients Page
+--------------------------------------- */
+
+/* Container for all Patients content */
+.patients-page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  /* If you want a subtle background for the main area:
+     background-color: #f6f7f9;
+  */
+}
+
+/* Header row with Title, Search, and Add Button */
+.patients-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px; /* Extra spacing below the header */
+}
+
+/* Group the search bar and add button on the right */
+.search-and-add {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* Space between search and button */
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #9CB1B7;      /* Text color from your design */
+  background-color: transparent;
+  flex: 1;             /* Let input expand to fill remaining space */
+}
+
+/* Optional placeholder color (modern browsers) */
+.search-input::placeholder {
+  color: #9CB1B7;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border: 1px solid #E8EDEC; /* Light gray border from your screenshot */
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  /* You can set a fixed width or let it shrink/grow:
+     width: 220px;
+  */
+}
+
+.search-icon {
+  width: 16px;   /* Adjust to your preference */
+  height: 16px;
+  margin-right: 8px;
+}
+
+/* Add New Patient button */
+.add-patient-button {
+  background-color: #3A6470;
+  color: #fff;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  display: inline-flex;
+  align-items: center; /* Centers icon and text vertically */
+}
+
+.add-patient-button:hover {
+  background-color: #014f56;
+}
+
+.add-icon {
+  width: 15px;
+  height: 15px;
+  margin-right: 6px;
+}
+
+/* Grid for the patient cards */
+.patients-grid {
+  display: grid;
+  /* 3 columns if there's enough space, otherwise wrap */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  /* Add some padding around the grid if desired */
+  /* padding: 10px; */
+}
+
+/* Each patient card */
+.patient-card {
+  background-color: #F7F9F8;
+  border: 1px solid #EBF0F1;
+  padding: 20px;
+  border-radius: 8px;
+  transition: box-shadow 0.2s ease;
+}
+
+.patient-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: #E8EDEC;
+  border: 1px solid #C4D1D4;
+}
+
+/* Label text color */
+.label {
+  color: #75939B; /* Darker color for labels */
+  font-weight: 600; /* Optional: make labels bold */
+}
+
+/* Value text color */
+.value {
+  color: #3A6470; /* Lighter or secondary color for the values */
+  font-weight: 600;
+}
+
+/* "NEW" label styling */
+.new-label {
+  color: #DD9178;
+  font-size: 0.9rem;
+  margin-left: 6px;
+  font-weight: 600;
+}
+
+/* Stack the action buttons vertically, left-aligned */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  align-items: flex-start; /* Ensures buttons are left-aligned */
+}
+
+/* Let the button size to its content (text + icon) */
+.action-btn {
+  background-color: #3A6470; /* Or any color you prefer */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+
+  /* Inline-flex ensures the button only spans as wide as the text/icon */
+  display: inline-flex;
+  align-items: center; /* Vertically center icon + text if you add an icon */
+  gap: 6px; /* Space between icon and text if you use one */
+  transition: background-color 0.3s;
+}
+
+.action-btn:hover {
+  background-color: #014f56;
+}
+
+.action-icon {
+  width: 12px;
+  height: 12px;
+}
