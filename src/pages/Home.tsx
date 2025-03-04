@@ -5,14 +5,20 @@ import './Home.css';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/firebaseConfig';
 
+// Import each icon from your assets folder
+import dashboardIcon from '../assets/dashboard.png';
+import userIcon from '../assets/user.png';
+import statsIcon from '../assets/stats.png';
+import logoutIcon from '../assets/logout.png';
+
 const Home: React.FC = () => {
   const navigate = useNavigate();
 
   // Disable scrolling on Home page by adding a class to body
   useEffect(() => {
-    document.body.classList.add("home-page-body");
+    document.body.classList.add('home-page-body');
     return () => {
-      document.body.classList.remove("home-page-body");
+      document.body.classList.remove('home-page-body');
     };
   }, []);
 
@@ -23,7 +29,7 @@ const Home: React.FC = () => {
         navigate('/');
       })
       .catch((error) => {
-        console.error("Error signing out:", error);
+        console.error('Error signing out:', error);
         // Optionally, show an error message to the user.
       });
   };
@@ -35,10 +41,10 @@ const Home: React.FC = () => {
           <li>
             <NavLink
               to="Dashboard"
-              className={({ isActive }) => (isActive ? "active" : "")}
+              className={({ isActive }) => (isActive ? 'active' : '')}
             >
               <div className="nav-item">
-                <img src="src/assets/dashboard.png" alt="Dashboard Icon" className="icon" />
+                <img src={dashboardIcon} alt="Dashboard Icon" className="icon" />
                 <span className="nav-text">Dashboard</span>
               </div>
             </NavLink>
@@ -46,10 +52,10 @@ const Home: React.FC = () => {
           <li>
             <NavLink
               to="Patients"
-              className={({ isActive }) => (isActive ? "active" : "")}
+              className={({ isActive }) => (isActive ? 'active' : '')}
             >
               <div className="nav-item">
-                <img src="src/assets/user.png" alt="Patients Icon" className="icon" />
+                <img src={userIcon} alt="Patients Icon" className="icon" />
                 <span className="nav-text">Patients</span>
               </div>
             </NavLink>
@@ -57,10 +63,10 @@ const Home: React.FC = () => {
           <li>
             <NavLink
               to="/PatientGaitAnalysis"
-              className={({ isActive }) => (isActive ? "active" : "")}
+              className={({ isActive }) => (isActive ? 'active' : '')}
             >
               <div className="nav-item">
-                <img src="src/assets/stats.png" alt="Data Icon" className="icon" />
+                <img src={statsIcon} alt="Data Icon" className="icon" />
                 <span className="nav-text">Data Visualization</span>
               </div>
             </NavLink>
@@ -69,7 +75,7 @@ const Home: React.FC = () => {
           <li className="logout-item">
             <button onClick={handleLogout} className="logout-button">
               <div className="nav-item">
-                <img src="src/assets/logout.png" alt="Logout Icon" className="icon" />
+                <img src={logoutIcon} alt="Logout Icon" className="icon" />
                 <span className="nav-text">Logout</span>
               </div>
             </button>
