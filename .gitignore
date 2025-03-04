@@ -25,3 +25,5 @@ dist-ssr
 *.sln
 *.sw?
 src/firebase/firebase-admin-key.json
+src/firebase/serviceAccountKey.json
+src/firebase/serviceAccountKey.json
