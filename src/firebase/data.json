@@ -1,16 +1,10 @@
 {
     "clinicians": {
-        "clinician1": {
-            "name": "Dr. John Doe",
-            "email": "johndoe@example.com",
+        "Z6wDjMsE8pQFK8p3W72yvLq7Ysp1": {
+            "name": "Clinician #1",
+            "email": "clinician#1@gmail.com",
             "password": "hashed_password_here",
             "patients": ["patient1", "patient2"]
-        },
-        "clinician2": {
-            "name": "Dr. Jane Smith",
-            "email": "janesmith@example.com",
-            "password": "hashed_password_here",
-            "patients": ["patient3"]
         }
     },
     "patients": {
@@ -30,7 +24,9 @@
                     "gaitMetrics": {
                         "velocity": 1.5,
                         "cadence": 80,
-                        "stride_length": 0.8
+                        "stride_length": 0.8,
+                        "pressure": 30,
+                        "symmetry": 0.9
                     },
                     "status": "uploaded"
                 }

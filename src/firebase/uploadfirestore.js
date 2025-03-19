@@ -1,68 +1,57 @@
 import admin from "firebase-admin";
 import fs from "fs";
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
 
-const serviceAccount = JSON.parse(fs.readFileSync("./src/firebase/serviceAccountKey.json", "utf8"));
+// Fixes `__dirname` not being available in ES Modules
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
+const serviceAccount = JSON.parse(
+    fs.readFileSync(resolve(__dirname, "serviceAccountKey.json"), "utf8")
+);
 
-// Initialize Firebase Admin SDK
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
+    databaseURL: "sensars-gaitanalysistol"
 });
 
 const db = admin.firestore();
 
-// Read JSON file
-const rawData = fs.readFileSync("./src/firebase/data.json", "utf-8");
-const data = JSON.parse(rawData);
+// Load JSON file
+const data = JSON.parse(fs.readFileSync(resolve(__dirname, "data.json"), "utf8"));
 
-// Function to upload data
 const uploadData = async () => {
     try {
-        console.log("📤 Uploading data to Firestore...");
-
-        // Upload clinicians
-        const cliniciansRef = db.collection("clinicians");
-        for (const [id, clinician] of Object.entries(data.clinicians || {})) {
-            await cliniciansRef.doc(id).set(clinician);
+        // Upload Clinicians
+        for (const [clinicianId, clinicianData] of Object.entries(data.clinicians)) {
+            await db.collection("clinicians").doc(clinicianId).set(clinicianData);
         }
 
-        // Upload patients
-        const patientsRef = db.collection("patients");
-        for (const [id, patient] of Object.entries(data.patients || {})) {
-            await patientsRef.doc(id).set(patient);
-
-            // Upload gaitData subcollection
-            if (patient.gaitData) {
-                const gaitDataRef = db.collection("patients").doc(id).collection("gaitData");
-                for (const [gaitId, gaitEntry] of Object.entries(patient.gaitData)) {
-                    await gaitDataRef.doc(gaitId).set(gaitEntry);
-                }
-            }
+        // Upload Patients
+        for (const [patientId, patientData] of Object.entries(data.patients)) {
+            await db.collection("patients").doc(patientId).set(patientData);
         }
 
-        // Upload external controllers
-        const ecRef = db.collection("external_controllers");
-        for (const [id, ec] of Object.entries(data.external_controllers || {})) {
-            await ecRef.doc(id).set(ec);
+        // Upload External Controllers
+        for (const [ecId, ecData] of Object.entries(data.external_controllers)) {
+            await db.collection("external_controllers").doc(ecId).set(ecData);
         }
 
-        // Upload implantable pulse generators
-        const ipgRef = db.collection("implantable_pulse_generators");
-        for (const [id, ipg] of Object.entries(data.implantable_pulse_generators || {})) {
-            await ipgRef.doc(id).set(ipg);
+        // Upload Implantable Pulse Generators
+        for (const [ipgId, ipgData] of Object.entries(data.implantable_pulse_generators)) {
+            await db.collection("implantable_pulse_generators").doc(ipgId).set(ipgData);
         }
 
-        // Upload sensor sets
-        const sensorsRef = db.collection("sensor_sets");
-        for (const [id, sensor] of Object.entries(data.sensor_sets || {})) {
-            await sensorsRef.doc(id).set(sensor);
+        // Upload Sensor Sets
+        for (const [sensorId, sensorData] of Object.entries(data.sensor_sets)) {
+            await db.collection("sensor_sets").doc(sensorId).set(sensorData);
         }
 
-        console.log("✅ Data successfully uploaded to Firestore!");
+        console.log("🔥 Firestore data uploaded successfully!");
     } catch (error) {
         console.error("❌ Error uploading data:", error);
     }
 };
 
-// Run the function
+// Run the upload function by doing "node uploadfirestore.js"
 uploadData();
