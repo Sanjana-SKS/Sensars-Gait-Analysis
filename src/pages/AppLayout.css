@@ -1,0 +1,115 @@
+/* Ensure the full-page layout is consistent */
+body {
+    margin: 0;
+    font-family: system-ui;
+    background-color: white;
+  }
+  
+  /* Full app container */
+  .app-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  /* Sidebar Navigation */
+  .sidebar {
+    width: 100px;
+    background-color: #375A65;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+    gap: 15px;
+    height: 100vh;
+  }
+  
+  /* Sidebar Navigation List */
+  .sidebar ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  /* Sidebar Items */
+  .sidebar li {
+    display: flex;
+    justify-content: center;
+    padding: 5px 0;
+    width: 100%;
+  }
+  
+  /* Sidebar Links */
+  .sidebar a {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 14px;
+    transition: background 0.3s;
+    padding: 10px;
+    width: 85px;
+    text-align: center;
+    border-radius: 10px;
+    margin: 5px;
+  }
+  
+  .sidebar a .nav-text {
+    opacity: 0.6;
+    transition: opacity 0.3s;
+  }
+  
+  /* Active and Hover States */
+  .sidebar a.active .nav-text,
+  .sidebar a:hover .nav-text {
+    opacity: 1;
+  }
+  
+  .sidebar a.active {
+    background-color: #4D7C8A;
+    border-radius: 10px;
+    padding: 10px;
+  }
+  
+  .sidebar a:hover {
+    background-color: #3B6A76;
+    padding: 10px;
+  }
+  
+  /* Logout Button (Pushed to Bottom) */
+  .logout-item {
+    margin-top: auto;
+    margin-bottom: 20px;
+  }
+  
+  .logout-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 10px;
+    width: 85px;
+    text-align: center;
+    border-radius: 10px;
+    margin: 5px;
+  }
+  
+  .logout-button:hover {
+    background-color: #3B6A76;
+  }
+  
+  /* Main Content Area */
+  .main-content {
+    flex-grow: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+  

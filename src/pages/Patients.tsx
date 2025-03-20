@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // If using React Router
 import './Patients.css';
+import { db } from '../firebase/firebaseConfig';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { auth } from '../firebase/firebaseConfig';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import bcrypt from 'bcryptjs'; // Optionally for hashing (client side - not ideal)
 import folderIcon from '../Assets/folder.png';
 import addIcon from '../Assets/plus.png';
 import searchIcon from '../Assets/search.png';
@@ -11,6 +16,19 @@ const Patients: React.FC = () => {
   // Navigation hook (remove if you don't use React Router)
   const navigate = useNavigate();
 
+    // Automatically sign in a test clinician if not already signed in
+    useEffect(() => {
+      if (!auth.currentUser) {
+        signInWithEmailAndPassword(auth, "clinician#1@gmail.com", "sensarsgait")
+          .then((userCredential) => {
+            console.log("User is signed in:", userCredential.user.uid);
+          })
+          .catch((error) => {
+            console.error("Error signing in:", error);
+          });
+      }
+    }, []);
+
   // Modal state
   const [showModal, setShowModal] = useState(false);
 
@@ -19,6 +37,7 @@ const Patients: React.FC = () => {
 
   // Form fields
   const [clinicalId, setClinicalId] = useState('');
+  //const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [age, setAge] = useState('');
   const [height, setHeight] = useState('');
@@ -30,6 +49,7 @@ const Patients: React.FC = () => {
   const [heightError, setHeightError] = useState('');
   const [weightError, setWeightError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [formError, setFormError] = useState('');
 
   // Dummy data for the patients
   const dummyPatients = [
@@ -40,6 +60,9 @@ const Patients: React.FC = () => {
     { clinicalStudyId: 9087, age: 61, origin: 'Right foot, right calf' },
     { clinicalStudyId: 3100, age: 42, origin: 'Left foot, left calf' },
   ];
+
+   // Example: your logged-in clinician's ID (replace with real logic)
+   const clinicianId = auth.currentUser?.uid || "";
 
   // Toggle modal, clear form if closing
   const toggleModal = () => {
@@ -83,11 +106,20 @@ const Patients: React.FC = () => {
     setPasswordError(''); // clear error if any
   };
 
+    // Generate a unique Patient ID if not provided
+    const generatePatientId = () => {
+      if (clinicalId.trim() !== '') {
+        return clinicalId;
+      }
+      // If user didn't specify an ID, generate one:
+      return 'P' + Math.floor(Math.random() * 100000).toString();
+    };
+
   // Check if required fields are filled
-  const isCreateDisabled = !clinicalId || !password || !indication || !origin;
+  const isCreateDisabled = !indication || !origin || !password || !clinicalId;
 
   // Create a Patient (no backend logic yet)
-  const handleCreatePatient = () => {
+  const handleCreatePatient = async () => {
     // Validate password
     if (!password) {
       setPasswordError('Password is required. Please enter or generate one.');
@@ -111,9 +143,68 @@ const Patients: React.FC = () => {
       setWeightError('');
     }
 
-    // If all checks pass -> close modal, clear form, navigate to patients
-    toggleModal(); // This also clears fields due to the toggle logic
-    navigate('/patients'); // If using React Router. Otherwise, your own logic.
+    if (!indication || !origin || !password) {
+      setFormError('Please fill all required fields.');
+      return;
+    }
+
+    // Clear generic error if any
+    setFormError('');
+
+    // Generate or use existing patient ID
+    const patientId = generatePatientId();
+
+    console.log("Clinician ID:", clinicianId, "Patient ID:", patientId);
+
+    // 1) Check for duplicate patient ID
+    try {
+      console.log("Clinician ID from auth:", clinicianId);
+      const patientRef = doc(db, 'clinicians', clinicianId, 'patients', patientId);
+      const patientSnap = await getDoc(patientRef);
+      if (patientSnap.exists()) {
+        setFormError('Patient ID already exists. Please use a different ID.');
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+      setFormError('Unable to check for existing patient. Check your internet and try again.');
+      return;
+    }
+
+    // 2) Hash the password (client-side; better to do server-side or rely on Firebase Auth)
+    const salt = bcrypt.genSaltSync(10);
+    const passwordHash = bcrypt.hashSync(password, salt);
+
+    // 3) Create the data object
+    const patientData = {
+      patientId,
+      clinicianId,
+      passwordHash,
+      age: age ? Number(age) : null,
+      height: height ? Number(height) : null,
+      weight: weight ? Number(weight) : null,
+      indication,
+      originOfPain: origin,
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      // 4) Store patient in Firestore
+      await setDoc(
+        doc(db, 'clinicians', clinicianId, 'patients', patientId),
+        patientData
+      );
+
+      // 5) (Optional) Create patient Auth account
+      // await createUserWithEmailAndPassword(auth, email, password);
+
+      alert('Patient created successfully!');
+      toggleModal(); // This also clears the form
+      navigate('/patients'); // Return to Patients tab
+    } catch (error) {
+      console.error(error);
+      setFormError('Unable to save patient. Please try again later.');
+    }
   };
 
   return (
@@ -295,6 +386,9 @@ const Patients: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* If there's a top-level form error (missing fields, duplicate ID, etc.) */}
+            {formError && <span className="error-text">{formError}</span>}
 
             {/* Modal Buttons */}
             <div className="modal-buttons">

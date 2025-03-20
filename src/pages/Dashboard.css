@@ -1,108 +1,19 @@
-body {
-    margin: 0;
-    font-family: system-ui;
-    background-color: white;
-  }
-  
-  .app-container {
-    display: flex;
-    height: 100vh;
-  }
-  
-  .sidebar {
-    width: 100px;
-    background-color: #375A65;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 0;
-    gap: 15px;
-  }
-  
-  .sidebar ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-  }
-  
-  .sidebar li {
-    display: flex;
-    justify-content: center;
-    padding: 5px 0;
-    width: 100%;
-  }
-  
-  .sidebar a {
-    color: white;
-    text-decoration: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 14px;
-    transition: background 0.3s;
-    padding: 10px;
-    width: 85px;
-    text-align: center;
-    border-radius: 10px;
-    margin: 5px;
-  }
-  
-  .sidebar a .nav-text {
-    opacity: 0.6;
-    transition: opacity 0.3s;
-  }
-  
-  .sidebar a.active .nav-text,
-  .sidebar a:hover .nav-text {
-    opacity: 1;
-  }
-  
-  .sidebar a.active {
-    background-color: #4D7C8A;
-    border-radius: 10px;
-    padding: 10px;
-  }
-  
-  .sidebar a:hover {
-    background-color: #3B6A76;
-    padding: 10px;
-  }
-  
-  .nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    width: 100%;
-  }
-  
-  .icon {
-    width: 30px;
-    height: 30px;
-    margin-bottom: 3px;
-  }
-  
-  .nav-text {
-    font-size: 12px;
-    text-align: center;
-  }
-  
-  .main-content {
-    flex-grow: 1;
-    padding: 10px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-  }
-  
-  .page-title {
-    color: #253228;
-    font-weight: bold;
-    margin-top: 0px;
-    padding-top: 10px;
-    padding-left: 5px;
-  }
-  
+
+/* Main content area */
+.main-content {
+  flex-grow: 1;
+  padding: 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+/* Page title style */
+.page-title {
+  color: #253228;
+  font-weight: bold;
+  margin-top: 0;
+  padding-top: 10px;
+  padding-left: 20px;
+  font-size: 32px;
+}

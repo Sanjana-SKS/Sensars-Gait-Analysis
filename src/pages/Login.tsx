@@ -1,21 +1,21 @@
-import { useEffect, useState } from 'react';
-import './Login.css';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebase/firebaseConfig"; // Import Firestore
+import "./Login.css";
 
-// Firebase imports
-import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebase/firebaseConfig';
-
-import email_icon from '../Assets/email.png';
-import password_icon from '../Assets/password.png';
+import email_icon from "../Assets/email.png";
+import password_icon from "../Assets/password.png";
 
 const Login = () => {
   const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const [error, setError] = useState(""); 
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // 1. Apply login page styling only when this component is active
+  // 🔥 Apply login page styling only when this component is active
   useEffect(() => {
     document.body.classList.add("login-page-body");
     return () => {
@@ -23,57 +23,71 @@ const Login = () => {
     };
   }, []);
 
-  // 2. Session Handling: check if the user is already logged in
+  // 🔥 Session Handling: Redirect if already logged in & authorized
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // User is signed in, redirect to Home
-        navigate("/Home");
+        const clinicianRef = doc(db, "clinicians", user.uid);
+        const clinicianSnap = await getDoc(clinicianRef);
+        if (clinicianSnap.exists()) {
+          navigate("/"); // ✅ Redirect to dashboard
+        } else {
+          setError("Access Denied: You are not a registered clinician.");
+        }
       }
     });
 
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, [navigate]);
 
-  // 3. Handle Login
-  const handleSubmitClick = () => {
+  // 🔥 Handle Login
+  const handleSubmitClick = async () => {
     if (!email || !password) {
       setError("Please fill in all fields.");
       return;
     }
 
-    // Sign in with Firebase
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        // If successful, user is now logged in
-        // onAuthStateChanged will handle navigation to /Home
-      })
-      .catch((err) => {
-        console.log("Error code:", err.code); // For debugging
-        if (
-          err.code === 'auth/user-not-found' ||
-          err.code === 'auth/wrong-password' ||
-          err.code === 'auth/invalid-credential'
-        ) {
-          setError("Incorrect email or password");
-        } else if (err.code === 'auth/network-request-failed') {
-          setError("No internet connection. Please try again later.");
-        } else {
-          setError("Something went wrong. Please try again.");
-        }
-      });      
-  };
+    setLoading(true);
+    setError("");
 
-  // 4. Navigate to Reset Password page (implementation can be done later)
-  const handleForgotPasswordClick = () => {
-    navigate("/reset-password");
+    try {
+      // Step 1: Authenticate User
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Step 2: Verify if the user exists in the "clinicians" collection
+      const clinicianRef = doc(db, "clinicians", user.uid);
+      const clinicianSnap = await getDoc(clinicianRef);
+
+      if (clinicianSnap.exists()) {
+        console.log("Clinician authenticated successfully");
+        navigate("/"); // ✅ Redirect to the clinician dashboard
+      } else {
+        setError("Access Denied: You are not a registered clinician.");
+      }
+    } catch (err: any) {
+      console.log("Error:", err.code);
+
+      if (
+        err.code === "auth/user-not-found" || 
+        err.code === "auth/wrong-password" || 
+        err.code === "auth/invalid-credential"
+      ) {
+        setError("Incorrect email or password");
+      } else if (err.code === "auth/network-request-failed") {
+        setError("No internet connection. Please try again later.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className='container'>
+    <div className="container">
       <div className="header">
-        <div className="text">Login</div>
+        <div className="text">Clinician Login</div>
         <div className="underline"></div>
       </div>
 
@@ -85,6 +99,7 @@ const Login = () => {
             placeholder="Email ID" 
             value={email} 
             onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
           />
         </div>
         <div className="input">
@@ -94,20 +109,25 @@ const Login = () => {
             placeholder="Password" 
             value={password} 
             onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
           />
         </div>
       </div>
 
-      <div className="forgot-password" onClick={handleForgotPasswordClick}>
+      <div className="forgot-password" onClick={() => navigate("/reset-password")}>
         Forgot Password? <span>Click Here!</span>
       </div>
 
       {error && <div className="error-message errormessage">{error}</div>}
 
       <div className="submit-container">
-        <div className={`submit ${error ? 'error' : ''}`} onClick={handleSubmitClick}>
-          Submit
-        </div>
+        <button 
+          className={`submit ${error ? "error" : ""}`} 
+          onClick={handleSubmitClick}
+          disabled={loading}
+        >
+          {loading ? "Logging in..." : "Submit"}
+        </button>
       </div>
     </div>
   );

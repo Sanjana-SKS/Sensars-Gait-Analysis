@@ -1,48 +1,36 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import './Home.css';
-
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/firebaseConfig';
+import './AppLayout.css';
 
-// Import each icon from your assets folder
+// Import sidebar icons
 import dashboardIcon from '../assets/dashboard.png';
 import userIcon from '../assets/user.png';
 import statsIcon from '../assets/stats.png';
 import logoutIcon from '../assets/logout.png';
 
-const Home: React.FC = () => {
+const AppLayout: React.FC = () => {
   const navigate = useNavigate();
 
-  // Disable scrolling on Home page by adding a class to body
-  useEffect(() => {
-    document.body.classList.add('home-page-body');
-    return () => {
-      document.body.classList.remove('home-page-body');
-    };
-  }, []);
-
-  const handleLogout = () => {
-    signOut(auth)
-      .then(() => {
-        // Successfully signed out. Redirect to Login page.
-        navigate('/');
-      })
-      .catch((error) => {
-        console.error('Error signing out:', error);
-        // Optionally, show an error message to the user.
-      });
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      console.log('User signed out successfully');
+      navigate('/Login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      alert('Failed to log out. Please try again.');
+    }
   };
 
   return (
     <div className="app-container">
+      {/* Sidebar Navigation */}
       <nav className="sidebar">
         <ul>
           <li>
-            <NavLink
-              to="Dashboard"
-              className={({ isActive }) => (isActive ? 'active' : '')}
-            >
+            <NavLink to="/Dashboard" className={({ isActive }) => (isActive ? 'active' : '')}>
               <div className="nav-item">
                 <img src={dashboardIcon} alt="Dashboard Icon" className="icon" />
                 <span className="nav-text">Dashboard</span>
@@ -50,10 +38,7 @@ const Home: React.FC = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink
-              to="Patients"
-              className={({ isActive }) => (isActive ? 'active' : '')}
-            >
+            <NavLink to="/Patients" className={({ isActive }) => (isActive ? 'active' : '')}>
               <div className="nav-item">
                 <img src={userIcon} alt="Patients Icon" className="icon" />
                 <span className="nav-text">Patients</span>
@@ -61,17 +46,14 @@ const Home: React.FC = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink
-              to="/PatientGaitAnalysis"
-              className={({ isActive }) => (isActive ? 'active' : '')}
-            >
+            <NavLink to="/PatientGaitAnalysis" className={({ isActive }) => (isActive ? 'active' : '')}>
               <div className="nav-item">
                 <img src={statsIcon} alt="Data Icon" className="icon" />
                 <span className="nav-text">Data Visualization</span>
               </div>
             </NavLink>
           </li>
-          {/* Push the logout button to the bottom */}
+          {/* Logout Button at Bottom */}
           <li className="logout-item">
             <button onClick={handleLogout} className="logout-button">
               <div className="nav-item">
@@ -82,6 +64,8 @@ const Home: React.FC = () => {
           </li>
         </ul>
       </nav>
+
+      {/* Main Content Area */}
       <main className="main-content">
         <Outlet />
       </main>
@@ -89,4 +73,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home;
+export default AppLayout;

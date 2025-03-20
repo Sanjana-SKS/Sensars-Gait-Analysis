@@ -28,7 +28,7 @@ const PatientGaitAnalysis: React.FC = () => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate("/Home");
+    navigate("/");
   };
 
   const handleShowEvolution = (metricName: string) => {
