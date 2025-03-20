@@ -1,108 +1,92 @@
 {
     "clinicians": {
-        "Z6wDjMsE8pQFK8p3W72yvLq7Ysp1": {
-            "name": "Clinician #1",
-            "email": "clinician#1@gmail.com",
-            "password": "hashed_password_here",
-            "patients": ["patient1", "patient2"]
-        }
+      "IWnyzrA45mSBcFGufxy9smdwgcK2": {
+        "name": "Dr. John Doe",
+        "email": "test2@gmail.com", 
+        "password": "hashed_password_123",
+        "patients": ["patient123", "patient456"] 
+      }
     },
     "patients": {
-        "patient1": {
-            "name": "Alice Johnson",
-            "dob": "1985-08-22",
-            "email": "alice@example.com",
-            "password": "hashed_password_here",
-            "clinicianId": "clinician1",
-            "ec": "ec1",
-            "ipg": "ipg1",
-            "sensors": ["sensor1", "sensor2"],
-            "gaitData": {
-                "gait1": {
-                    "sensorSetId": "sensor1",
-                    "timestamp": "2025-02-18T12:00:00Z",
-                    "gaitMetrics": {
-                        "velocity": 1.5,
-                        "cadence": 80,
-                        "stride_length": 0.8,
-                        "pressure": 30,
-                        "symmetry": 0.9
-                    },
-                    "status": "uploaded"
-                }
-            }
-        },
-        "patient2": {
-            "name": "Bob Williams",
-            "dob": "1992-05-15",
-            "email": "bob@example.com",
-            "password": "hashed_password_here",
-            "clinicianId": "clinician1",
-            "ec": "ec2",
-            "ipg": "ipg2",
-            "sensors": ["sensor3"],
-            "gaitData": {}
-        }
+      "patient123": { 
+        "name": "Jane Smith",
+        "dob": "1985-06-15",
+        "email": "janesmith@gmail.com", 
+        "password": "hashed_password_abc",
+        "clinicianId": "IWnyzrA45mSBcFGufxy9smdwgcK2",
+        "ec": "ec789",
+        "ipg": "ipg654",
+        "sensors": ["sensor001", "sensor002"],
+        "gaitData": {}
+      },
+      "patient456": { 
+        "name": "Robert Brown",
+        "dob": "1992-11-22",
+        "email": "robertbrown@example.com",
+        "password": "hashed_password_xyz",
+        "clinicianId": "IWnyzrA45mSBcFGufxy9smdwgcK2",
+        "ec": "ec321",
+        "ipg": "ipg987",
+        "sensors": ["sensor003", "sensor004"],
+        "gaitData": {}
+      }
     },
     "external_controllers": {
-        "ec1": {
-            "patientId": "patient1",
-            "model": "EC-2000",
-            "status": "active",
-            "battery": 85,
-            "lastSync": "2025-02-18T12:05:00Z"
-        },
-        "ec2": {
-            "patientId": "patient2",
-            "model": "EC-3000",
-            "status": "charging",
-            "battery": 40,
-            "lastSync": "2025-02-17T20:30:00Z"
-        }
+      "ec789": {
+        "patientId": "patient123",
+        "model": "EC-Model-X",
+        "status": "active",
+        "battery": "85%",
+        "lastSync": "2025-03-19T14:00:00Z"
+      },
+      "ec321": {
+        "patientId": "patient456",
+        "model": "EC-Model-Y",
+        "status": "charging",
+        "battery": "45%",
+        "lastSync": "2025-03-19T15:30:00Z"
+      }
     },
     "implantable_pulse_generators": {
-        "ipg1": {
-            "patientId": "patient1",
-            "model": "IPG-X100",
-            "status": "active",
-            "battery": 90,
-            "lastSync": "2025-02-18T12:10:00Z"
-        },
-        "ipg2": {
-            "patientId": "patient2",
-            "model": "IPG-Z200",
-            "status": "inactive",
-            "battery": 75,
-            "lastSync": "2025-02-16T18:45:00Z"
-        }
+      "ipg654": {
+        "patientId": "patient123",
+        "model": "IPG-Model-A",
+        "status": "active",
+        "battery": "78%",
+        "lastSync": "2025-03-19T14:10:00Z"
+      },
+      "ipg987": {
+        "patientId": "patient456",
+        "model": "IPG-Model-B",
+        "status": "inactive",
+        "battery": "30%",
+        "lastSync": "2025-03-19T12:45:00Z"
+      }
     },
     "sensor_sets": {
-        "sensor1": {
-            "patientId": "patient1",
-            "type": "left leg",
-            "sensorDetails": {
-                "pressure": true,
-                "gyroscope": true
-            },
-            "lastSync": "2025-02-18T11:45:00Z"
-        },
-        "sensor2": {
-            "patientId": "patient1",
-            "type": "right leg",
-            "sensorDetails": {
-                "pressure": true,
-                "gyroscope": false
-            },
-            "lastSync": "2025-02-18T11:50:00Z"
-        },
-        "sensor3": {
-            "patientId": "patient2",
-            "type": "foot",
-            "sensorDetails": {
-                "temperature": true,
-                "pressure": true
-            },
-            "lastSync": "2025-02-17T15:30:00Z"
-        }
+      "sensor001": {
+        "patientId": "patient123",
+        "type": "left leg",
+        "sensorDetails": {"pressure": "high", "temperature": "normal", "gyroscope": "stable"},
+        "lastSync": "2025-03-19T13:50:00Z"
+      },
+      "sensor002": {
+        "patientId": "patient123",
+        "type": "right leg",
+        "sensorDetails": {"pressure": "low", "temperature": "high", "gyroscope": "unstable"},
+        "lastSync": "2025-03-19T13:55:00Z"
+      },
+      "sensor003": {
+        "patientId": "patient456",
+        "type": "foot",
+        "sensorDetails": {"pressure": "normal", "temperature": "low", "gyroscope": "stable"},
+        "lastSync": "2025-03-19T14:05:00Z"
+      },
+      "sensor004": {
+        "patientId": "patient456",
+        "type": "ankle",
+        "sensorDetails": {"pressure": "medium", "temperature": "normal", "gyroscope": "stable"},
+        "lastSync": "2025-03-19T14:15:00Z"
+      }
     }
-}
+  }
