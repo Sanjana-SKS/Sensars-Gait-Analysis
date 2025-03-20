@@ -36,8 +36,7 @@ const Patients: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   // Form fields
-  const [clinicalId, setClinicalId] = useState('');
-  //const [email, setEmail] = useState('');
+  const [patientId, setPatientId] = useState('');
   const [password, setPassword] = useState('');
   const [age, setAge] = useState('');
   const [height, setHeight] = useState('');
@@ -51,24 +50,21 @@ const Patients: React.FC = () => {
   const [passwordError, setPasswordError] = useState('');
   const [formError, setFormError] = useState('');
 
-  // Dummy data for the patients
-  const dummyPatients = [
+   // Patient list (includes newly added patients)
+   const [patients] = useState([
     { clinicalStudyId: 8493, isNew: true, age: 46, origin: 'Right foot, right calf' },
     { clinicalStudyId: 5442, age: 54, origin: 'Right foot, right calf' },
     { clinicalStudyId: 3498, age: 41, origin: 'Right calf' },
     { clinicalStudyId: 2865, age: 78, origin: 'Right foot' },
     { clinicalStudyId: 9087, age: 61, origin: 'Right foot, right calf' },
     { clinicalStudyId: 3100, age: 42, origin: 'Left foot, left calf' },
-  ];
-
-   // Example: your logged-in clinician's ID (replace with real logic)
-   const clinicianId = auth.currentUser?.uid || "";
+  ]);
 
   // Toggle modal, clear form if closing
   const toggleModal = () => {
     if (showModal) {
       // Modal is about to close -> clear all fields
-      setClinicalId('');
+      setPatientId('');
       setPassword('');
       setAge('');
       setHeight('');
@@ -116,96 +112,64 @@ const Patients: React.FC = () => {
     };
 
   // Check if required fields are filled
-  const isCreateDisabled = !indication || !origin || !password || !clinicalId;
+  const isCreateDisabled = !patientId || !password || !indication || !origin;
 
-  // Create a Patient (no backend logic yet)
+  // Create a Patient
   const handleCreatePatient = async () => {
-    // Validate password
-    if (!password) {
-      setPasswordError('Password is required. Please enter or generate one.');
-      return;
-    } else {
-      setPasswordError('');
-    }
-
-    // Validate numeric fields
-    if (isNaN(Number(height))) {
-      setHeightError('Height must be numeric');
-      return;
-    } else {
-      setHeightError('');
-    }
-
-    if (isNaN(Number(weight))) {
-      setWeightError('Weight must be numeric');
-      return;
-    } else {
-      setWeightError('');
-    }
-
-    if (!indication || !origin || !password) {
-      setFormError('Please fill all required fields.');
+    // Ensure required fields are filled
+    if (!patientId.trim() || !password.trim() || !indication.trim() || !origin.trim()) {
+      alert("Please fill all required fields.");
       return;
     }
-
-    // Clear generic error if any
-    setFormError('');
-
-    // Generate or use existing patient ID
-    const patientId = generatePatientId();
-
-    console.log("Clinician ID:", clinicianId, "Patient ID:", patientId);
-
-    // 1) Check for duplicate patient ID
+  
+    const newPatient = {
+      patientId: patientId.trim(),  // Match Firestore field names
+      email: `${patientId.trim()}@example.com`, 
+      password: password.trim(),
+      age: age ? parseInt(age) : null,
+      height: height ? parseInt(height) : null,
+      weight: weight ? parseInt(weight) : null,
+      indication: indication.trim() || "N/A",  // Avoid `undefined`
+      originOfPain: origin.trim() || "Unknown",  // Ensure correct field name
+    };
+  
     try {
-      console.log("Clinician ID from auth:", clinicianId);
-      const patientRef = doc(db, 'clinicians', clinicianId, 'patients', patientId);
-      const patientSnap = await getDoc(patientRef);
-      if (patientSnap.exists()) {
-        setFormError('Patient ID already exists. Please use a different ID.');
+      const authToken = localStorage.getItem("token");
+  
+      if (!authToken) {
+        alert("Authentication token not found. Please log in.");
         return;
       }
-    } catch (error) {
-      console.error(error);
-      setFormError('Unable to check for existing patient. Check your internet and try again.');
-      return;
-    }
-
-    // 2) Hash the password (client-side; better to do server-side or rely on Firebase Auth)
-    const salt = bcrypt.genSaltSync(10);
-    const passwordHash = bcrypt.hashSync(password, salt);
-
-    // 3) Create the data object
-    const patientData = {
-      patientId,
-      clinicianId,
-      passwordHash,
-      age: age ? Number(age) : null,
-      height: height ? Number(height) : null,
-      weight: weight ? Number(weight) : null,
-      indication,
-      originOfPain: origin,
-      createdAt: new Date().toISOString(),
-    };
-
-    try {
-      // 4) Store patient in Firestore
-      await setDoc(
-        doc(db, 'clinicians', clinicianId, 'patients', patientId),
-        patientData
+  
+      const response = await fetch(
+        `http://localhost:3000/clinicians/IWnyzrA45mSBcFGufxy9smdwgcK2/patients`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify(newPatient),
+        }
       );
-
-      // 5) (Optional) Create patient Auth account
-      // await createUserWithEmailAndPassword(auth, email, password);
-
-      alert('Patient created successfully!');
-      toggleModal(); // This also clears the form
-      navigate('/patients'); // Return to Patients tab
+  
+      const data = await response.json();
+      if (response.ok) {
+        alert("Patient created successfully!");
+  
+        // Update Patients List dynamically  
+        toggleModal();
+        navigate("/patients");
+      } else {
+        alert(data.error || "Failed to create patient.");
+      }
     } catch (error) {
-      console.error(error);
-      setFormError('Unable to save patient. Please try again later.');
+      console.error("Error creating patient:", error);
+      alert("An error occurred. Please try again.");
     }
   };
+  
+  
 
   return (
     <div className="patients-page">
@@ -226,25 +190,21 @@ const Patients: React.FC = () => {
 
       {/* Grid Layout for Patient Cards */}
       <div className="patients-grid">
-        {dummyPatients.map((patient, idx) => (
+        {patients.map((patient, idx) => (
           <div className="patient-card" key={idx}>
             <div className="patient-id">
               <span className="label">Patient Clinical Study ID#: </span>
               <span className="value">{patient.clinicalStudyId}</span>
               {patient.isNew && <span className="new-label"> NEW</span>}
             </div>
-
             <div className="patient-age">
               <span className="label">Age: </span>
               <span className="value">{patient.age} y.o.</span>
             </div>
-
             <div className="patient-origin">
               <span className="label">Origin of pain: </span>
               <span className="value">{patient.origin}</span>
             </div>
-
-            {/* Buttons */}
             <div className="action-buttons">
               <button className="action-btn">
                 <img src={folderIcon} alt="Folder" className="action-icon" />
@@ -277,8 +237,8 @@ const Patients: React.FC = () => {
                   <input
                     type="text"
                     className="form-input"
-                    value={clinicalId}
-                    onChange={(e) => setClinicalId(e.target.value)}
+                    value={patientId}
+                    onChange={(e) => setPatientId(e.target.value)}
                   />
                 </div>
 

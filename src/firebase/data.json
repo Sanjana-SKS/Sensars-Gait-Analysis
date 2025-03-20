@@ -1,92 +1,144 @@
 {
-    "clinicians": {
-      "IWnyzrA45mSBcFGufxy9smdwgcK2": {
-        "name": "Dr. John Doe",
-        "email": "test2@gmail.com", 
-        "password": "hashed_password_123",
-        "patients": ["patient123", "patient456"] 
+  "clinicians": {
+    "IWnyzrA45mSBcFGufxy9smdwgcK2": {
+      "name": "Dr. John Doe",
+      "email": "test2@gmail.com",
+      "password": "hashed_password_123",
+      "patients": ["patient123", "patient456"]
+    }
+  },
+  "patients": {
+    "patient123": {
+      "name": "Jane Smith",
+      "dob": "1985-06-15",
+      "age": 39,
+      "height": 165,
+      "weight": 68,
+      "indication": "Peripheral Neuropathy",
+      "originOfPain": "Post-Surgical",
+      "email": "janesmith@gmail.com",
+      "password": "hashed_password_abc",
+      "clinicianId": "IWnyzrA45mSBcFGufxy9smdwgcK2",
+      "ec": "ec789",
+      "ipg": "ipg654",
+      "sensors": ["sensor001", "sensor002"],
+      "gaitData": {
+        "gait1": {
+          "sensorSetId": "sensor001",
+          "timestamp": "2025-03-19T14:30:00Z",
+          "gaitMetrics": {
+            "velocity": 1.4,
+            "cadence": 75,
+            "stride_length": 0.9,
+            "pressure": 28,
+            "symmetry": 0.88
+          },
+          "status": "uploaded"
+        }
       }
     },
-    "patients": {
-      "patient123": { 
-        "name": "Jane Smith",
-        "dob": "1985-06-15",
-        "email": "janesmith@gmail.com", 
-        "password": "hashed_password_abc",
-        "clinicianId": "IWnyzrA45mSBcFGufxy9smdwgcK2",
-        "ec": "ec789",
-        "ipg": "ipg654",
-        "sensors": ["sensor001", "sensor002"],
-        "gaitData": {}
-      },
-      "patient456": { 
-        "name": "Robert Brown",
-        "dob": "1992-11-22",
-        "email": "robertbrown@example.com",
-        "password": "hashed_password_xyz",
-        "clinicianId": "IWnyzrA45mSBcFGufxy9smdwgcK2",
-        "ec": "ec321",
-        "ipg": "ipg987",
-        "sensors": ["sensor003", "sensor004"],
-        "gaitData": {}
-      }
-    },
-    "external_controllers": {
-      "ec789": {
-        "patientId": "patient123",
-        "model": "EC-Model-X",
-        "status": "active",
-        "battery": "85%",
-        "lastSync": "2025-03-19T14:00:00Z"
-      },
-      "ec321": {
-        "patientId": "patient456",
-        "model": "EC-Model-Y",
-        "status": "charging",
-        "battery": "45%",
-        "lastSync": "2025-03-19T15:30:00Z"
-      }
-    },
-    "implantable_pulse_generators": {
-      "ipg654": {
-        "patientId": "patient123",
-        "model": "IPG-Model-A",
-        "status": "active",
-        "battery": "78%",
-        "lastSync": "2025-03-19T14:10:00Z"
-      },
-      "ipg987": {
-        "patientId": "patient456",
-        "model": "IPG-Model-B",
-        "status": "inactive",
-        "battery": "30%",
-        "lastSync": "2025-03-19T12:45:00Z"
-      }
-    },
-    "sensor_sets": {
-      "sensor001": {
-        "patientId": "patient123",
-        "type": "left leg",
-        "sensorDetails": {"pressure": "high", "temperature": "normal", "gyroscope": "stable"},
-        "lastSync": "2025-03-19T13:50:00Z"
-      },
-      "sensor002": {
-        "patientId": "patient123",
-        "type": "right leg",
-        "sensorDetails": {"pressure": "low", "temperature": "high", "gyroscope": "unstable"},
-        "lastSync": "2025-03-19T13:55:00Z"
-      },
-      "sensor003": {
-        "patientId": "patient456",
-        "type": "foot",
-        "sensorDetails": {"pressure": "normal", "temperature": "low", "gyroscope": "stable"},
-        "lastSync": "2025-03-19T14:05:00Z"
-      },
-      "sensor004": {
-        "patientId": "patient456",
-        "type": "ankle",
-        "sensorDetails": {"pressure": "medium", "temperature": "normal", "gyroscope": "stable"},
-        "lastSync": "2025-03-19T14:15:00Z"
+    "patient456": {
+      "name": "Robert Brown",
+      "dob": "1992-11-22",
+      "age": 32,
+      "height": 178,
+      "weight": 80,
+      "indication": "Diabetic Neuropathy",
+      "originOfPain": "Left foot, left calf",
+      "email": "robertbrown@example.com",
+      "password": "hashed_password_xyz",
+      "clinicianId": "IWnyzrA45mSBcFGufxy9smdwgcK2",
+      "ec": "ec321",
+      "ipg": "ipg987",
+      "sensors": ["sensor003", "sensor004"],
+      "gaitData": {
+        "gait2": {
+          "sensorSetId": "sensor003",
+          "timestamp": "2025-03-19T15:00:00Z",
+          "gaitMetrics": {
+            "velocity": 1.2,
+            "cadence": 70,
+            "stride_length": 0.85,
+            "pressure": 32,
+            "symmetry": 0.9
+          },
+          "status": "uploaded"
+        }
       }
     }
+  },
+  "external_controllers": {
+    "ec789": {
+      "patientId": "patient123",
+      "model": "EC-Model-X",
+      "status": "active",
+      "battery": "85%",
+      "lastSync": "2025-03-19T14:00:00Z"
+    },
+    "ec321": {
+      "patientId": "patient456",
+      "model": "EC-Model-Y",
+      "status": "charging",
+      "battery": "45%",
+      "lastSync": "2025-03-19T15:30:00Z"
+    }
+  },
+  "implantable_pulse_generators": {
+    "ipg654": {
+      "patientId": "patient123",
+      "model": "IPG-Model-A",
+      "status": "active",
+      "battery": "78%",
+      "lastSync": "2025-03-19T14:10:00Z"
+    },
+    "ipg987": {
+      "patientId": "patient456",
+      "model": "IPG-Model-B",
+      "status": "inactive",
+      "battery": "30%",
+      "lastSync": "2025-03-19T12:45:00Z"
+    }
+  },
+  "sensor_sets": {
+    "sensor001": {
+      "patientId": "patient123",
+      "type": "left leg",
+      "sensorDetails": {
+        "pressure": "high",
+        "temperature": "normal",
+        "gyroscope": "stable"
+      },
+      "lastSync": "2025-03-19T13:50:00Z"
+    },
+    "sensor002": {
+      "patientId": "patient123",
+      "type": "right leg",
+      "sensorDetails": {
+        "pressure": "low",
+        "temperature": "high",
+        "gyroscope": "unstable"
+      },
+      "lastSync": "2025-03-19T13:55:00Z"
+    },
+    "sensor003": {
+      "patientId": "patient456",
+      "type": "foot",
+      "sensorDetails": {
+        "pressure": "normal",
+        "temperature": "low",
+        "gyroscope": "stable"
+      },
+      "lastSync": "2025-03-19T14:05:00Z"
+    },
+    "sensor004": {
+      "patientId": "patient456",
+      "type": "ankle",
+      "sensorDetails": {
+        "pressure": "medium",
+        "temperature": "normal",
+        "gyroscope": "stable"
+      },
+      "lastSync": "2025-03-19T14:15:00Z"
+    }
   }
+}

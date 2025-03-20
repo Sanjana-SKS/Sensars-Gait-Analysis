@@ -12,7 +12,6 @@ const Login = () => {
   const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const [error, setError] = useState(""); 
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // 🔥 Apply login page styling only when this component is active
@@ -40,48 +39,49 @@ const Login = () => {
     return () => unsubscribe();
   }, [navigate]);
 
-  // 🔥 Handle Login
-  const handleSubmitClick = async () => {
+  // 3. Handle Login with Firebase Authentication
+  const handleSubmitClick = () => {
     if (!email || !password) {
       setError("Please fill in all fields.");
       return;
     }
 
-    setLoading(true);
-    setError("");
+    // Sign in with Firebase
+    signInWithEmailAndPassword(auth, email, password)
+      .then(async (userCredential) => {
+        const user = userCredential.user;
+        
+        // ✅ Get Firebase Token
+        const token = await user.getIdToken();
+        
+        // ✅ Store token & user info in localStorage for API authentication
+        localStorage.setItem("token", token);
+        localStorage.setItem("userEmail", user.email || "");
+        localStorage.setItem("userId", user.uid);
 
-    try {
-      // Step 1: Authenticate User
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+        console.log("Login successful. Token saved.");
+        navigate("/Home"); // Redirect after login
+      })
+      .catch((err) => {
+        console.log("Error code:", err.code); // Debugging
+        if (
+          err.code === 'auth/user-not-found' ||
+          err.code === 'auth/wrong-password' ||
+          err.code === 'auth/invalid-credential'
+        ) {
+          setError("Incorrect email or password");
+        } else if (err.code === 'auth/network-request-failed') {
+          setError("No internet connection. Please try again later.");
+        } else {
+          setError("Something went wrong. Please try again.");
+        }
+      });
+  };
 
-      // Step 2: Verify if the user exists in the "clinicians" collection
-      const clinicianRef = doc(db, "clinicians", user.uid);
-      const clinicianSnap = await getDoc(clinicianRef);
 
-      if (clinicianSnap.exists()) {
-        console.log("Clinician authenticated successfully");
-        navigate("/"); // ✅ Redirect to the clinician dashboard
-      } else {
-        setError("Access Denied: You are not a registered clinician.");
-      }
-    } catch (err: any) {
-      console.log("Error:", err.code);
-
-      if (
-        err.code === "auth/user-not-found" || 
-        err.code === "auth/wrong-password" || 
-        err.code === "auth/invalid-credential"
-      ) {
-        setError("Incorrect email or password");
-      } else if (err.code === "auth/network-request-failed") {
-        setError("No internet connection. Please try again later.");
-      } else {
-        setError("Something went wrong. Please try again.");
-      }
-    } finally {
-      setLoading(false);
-    }
+  // 4. Navigate to Reset Password page (implementation can be done later)
+  const handleForgotPasswordClick = () => {
+    navigate("/reset-password");
   };
 
   return (
@@ -99,7 +99,6 @@ const Login = () => {
             placeholder="Email ID" 
             value={email} 
             onChange={(e) => setEmail(e.target.value)}
-            disabled={loading}
           />
         </div>
         <div className="input">
@@ -109,7 +108,6 @@ const Login = () => {
             placeholder="Password" 
             value={password} 
             onChange={(e) => setPassword(e.target.value)}
-            disabled={loading}
           />
         </div>
       </div>
@@ -121,13 +119,9 @@ const Login = () => {
       {error && <div className="error-message errormessage">{error}</div>}
 
       <div className="submit-container">
-        <button 
-          className={`submit ${error ? "error" : ""}`} 
-          onClick={handleSubmitClick}
-          disabled={loading}
-        >
-          {loading ? "Logging in..." : "Submit"}
-        </button>
+        <div className={`submit ${error ? 'error' : ''}`} onClick={handleSubmitClick}>
+          Submit
+        </div>
       </div>
     </div>
   );
