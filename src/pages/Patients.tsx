@@ -18,7 +18,7 @@ const Patients: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   // Form fields
-  const [clinicalId, setClinicalId] = useState('');
+  const [patientId, setPatientId] = useState('');
   const [password, setPassword] = useState('');
   const [age, setAge] = useState('');
   const [height, setHeight] = useState('');
@@ -31,21 +31,21 @@ const Patients: React.FC = () => {
   const [weightError, setWeightError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  // Dummy data for the patients
-  const dummyPatients = [
+   // Patient list (includes newly added patients)
+   const [patients] = useState([
     { clinicalStudyId: 8493, isNew: true, age: 46, origin: 'Right foot, right calf' },
     { clinicalStudyId: 5442, age: 54, origin: 'Right foot, right calf' },
     { clinicalStudyId: 3498, age: 41, origin: 'Right calf' },
     { clinicalStudyId: 2865, age: 78, origin: 'Right foot' },
     { clinicalStudyId: 9087, age: 61, origin: 'Right foot, right calf' },
     { clinicalStudyId: 3100, age: 42, origin: 'Left foot, left calf' },
-  ];
+  ]);
 
   // Toggle modal, clear form if closing
   const toggleModal = () => {
     if (showModal) {
       // Modal is about to close -> clear all fields
-      setClinicalId('');
+      setPatientId('');
       setPassword('');
       setAge('');
       setHeight('');
@@ -84,37 +84,64 @@ const Patients: React.FC = () => {
   };
 
   // Check if required fields are filled
-  const isCreateDisabled = !clinicalId || !password || !indication || !origin;
+  const isCreateDisabled = !patientId || !password || !indication || !origin;
 
-  // Create a Patient (no backend logic yet)
-  const handleCreatePatient = () => {
-    // Validate password
-    if (!password) {
-      setPasswordError('Password is required. Please enter or generate one.');
+  // Create a Patient
+  const handleCreatePatient = async () => {
+    // Ensure required fields are filled
+    if (!patientId.trim() || !password.trim() || !indication.trim() || !origin.trim()) {
+      alert("Please fill all required fields.");
       return;
-    } else {
-      setPasswordError('');
     }
-
-    // Validate numeric fields
-    if (isNaN(Number(height))) {
-      setHeightError('Height must be numeric');
-      return;
-    } else {
-      setHeightError('');
+  
+    const newPatient = {
+      patientId: patientId.trim(),  // Match Firestore field names
+      email: `${patientId.trim()}@example.com`, 
+      password: password.trim(),
+      age: age ? parseInt(age) : null,
+      height: height ? parseInt(height) : null,
+      weight: weight ? parseInt(weight) : null,
+      indication: indication.trim() || "N/A",  // Avoid `undefined`
+      originOfPain: origin.trim() || "Unknown",  // Ensure correct field name
+    };
+  
+    try {
+      const authToken = localStorage.getItem("token");
+  
+      if (!authToken) {
+        alert("Authentication token not found. Please log in.");
+        return;
+      }
+  
+      const response = await fetch(
+        `http://localhost:3000/clinicians/IWnyzrA45mSBcFGufxy9smdwgcK2/patients`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify(newPatient),
+        }
+      );
+  
+      const data = await response.json();
+      if (response.ok) {
+        alert("Patient created successfully!");
+  
+        // Update Patients List dynamically  
+        toggleModal();
+        navigate("/patients");
+      } else {
+        alert(data.error || "Failed to create patient.");
+      }
+    } catch (error) {
+      console.error("Error creating patient:", error);
+      alert("An error occurred. Please try again.");
     }
-
-    if (isNaN(Number(weight))) {
-      setWeightError('Weight must be numeric');
-      return;
-    } else {
-      setWeightError('');
-    }
-
-    // If all checks pass -> close modal, clear form, navigate to patients
-    toggleModal(); // This also clears fields due to the toggle logic
-    navigate('/patients'); // If using React Router. Otherwise, your own logic.
   };
+  
+  
 
   return (
     <div className="patients-page">
@@ -135,25 +162,21 @@ const Patients: React.FC = () => {
 
       {/* Grid Layout for Patient Cards */}
       <div className="patients-grid">
-        {dummyPatients.map((patient, idx) => (
+        {patients.map((patient, idx) => (
           <div className="patient-card" key={idx}>
             <div className="patient-id">
               <span className="label">Patient Clinical Study ID#: </span>
               <span className="value">{patient.clinicalStudyId}</span>
               {patient.isNew && <span className="new-label"> NEW</span>}
             </div>
-
             <div className="patient-age">
               <span className="label">Age: </span>
               <span className="value">{patient.age} y.o.</span>
             </div>
-
             <div className="patient-origin">
               <span className="label">Origin of pain: </span>
               <span className="value">{patient.origin}</span>
             </div>
-
-            {/* Buttons */}
             <div className="action-buttons">
               <button className="action-btn">
                 <img src={folderIcon} alt="Folder" className="action-icon" />
@@ -186,8 +209,8 @@ const Patients: React.FC = () => {
                   <input
                     type="text"
                     className="form-input"
-                    value={clinicalId}
-                    onChange={(e) => setClinicalId(e.target.value)}
+                    value={patientId}
+                    onChange={(e) => setPatientId(e.target.value)}
                   />
                 </div>
 

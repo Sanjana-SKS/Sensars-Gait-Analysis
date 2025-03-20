@@ -36,7 +36,7 @@ const Login = () => {
     return () => unsubscribe();
   }, [navigate]);
 
-  // 3. Handle Login
+  // 3. Handle Login with Firebase Authentication
   const handleSubmitClick = () => {
     if (!email || !password) {
       setError("Please fill in all fields.");
@@ -45,12 +45,22 @@ const Login = () => {
 
     // Sign in with Firebase
     signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        // If successful, user is now logged in
-        // onAuthStateChanged will handle navigation to /Home
+      .then(async (userCredential) => {
+        const user = userCredential.user;
+        
+        // ✅ Get Firebase Token
+        const token = await user.getIdToken();
+        
+        // ✅ Store token & user info in localStorage for API authentication
+        localStorage.setItem("token", token);
+        localStorage.setItem("userEmail", user.email || "");
+        localStorage.setItem("userId", user.uid);
+
+        console.log("Login successful. Token saved.");
+        navigate("/Home"); // Redirect after login
       })
       .catch((err) => {
-        console.log("Error code:", err.code); // For debugging
+        console.log("Error code:", err.code); // Debugging
         if (
           err.code === 'auth/user-not-found' ||
           err.code === 'auth/wrong-password' ||
@@ -62,8 +72,9 @@ const Login = () => {
         } else {
           setError("Something went wrong. Please try again.");
         }
-      });      
+      });
   };
+
 
   // 4. Navigate to Reset Password page (implementation can be done later)
   const handleForgotPasswordClick = () => {
