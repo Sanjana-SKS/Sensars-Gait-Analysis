@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Patients.css';
-import { db } from '../firebase/firebaseConfig';
 import { 
-  signInWithEmailAndPassword, 
   getAuth, 
   onAuthStateChanged, 
   setPersistence, 
   browserLocalPersistence,
-  signOut  // Import signOut from Firebase
+  signOut
 } from 'firebase/auth';
 import axios from "axios";
 import folderIcon from '../Assets/folder.png';

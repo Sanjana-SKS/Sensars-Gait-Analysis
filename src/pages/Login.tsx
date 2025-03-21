@@ -78,8 +78,7 @@ const Login = () => {
       });
   };
 
-
-  // 4. Navigate to Reset Password page (implementation can be done later)
+  // 4. Navigate to Reset Password page
   const handleForgotPasswordClick = () => {
     navigate("/reset-password");
   };
@@ -112,7 +111,7 @@ const Login = () => {
         </div>
       </div>
 
-      <div className="forgot-password" onClick={() => navigate("/reset-password")}>
+      <div className="forgot-password" onClick={handleForgotPasswordClick}>
         Forgot Password? <span>Click Here!</span>
       </div>
 
