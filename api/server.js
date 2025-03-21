@@ -12,7 +12,7 @@ dotenv.config(); // Load environment variables
 // ✅ Middleware to authenticate Firebase token
 import admin from "firebase-admin";
 // 🔹 Ensure Firebase Admin SDK initializes only once
-const serviceAccount = JSON.parse(readFileSync("api/serviceAccountKey.json", "utf8"));
+const serviceAccount = JSON.parse(readFileSync("src/firebase/serviceAccountKey.json", "utf8"));
 
 if (!admin.apps.length) {
     admin.initializeApp({
@@ -110,109 +110,107 @@ app.post("/clinicians/:clinicianId/patients", authenticate, async (req, res) => 
   
 
 
-// ✅ API Endpoint: GET /clinicians/:clinicianId/patients
 app.get("/clinicians/:clinicianId/patients", authenticate, async (req, res) => {
     try {
-        const { clinicianId } = req.params;
-        const { age, indication, page = 1, limit = 10 } = req.query;
-
-        // ✅ RBAC: Ensure the clinician can only access their own patients
-        console.log("User UID from Token:", req.user.uid);
-        console.log("Requested Clinician ID:", clinicianId);
-
-        if (req.user.uid !== clinicianId) {
-            console.log("❌ Clinician ID does not match authenticated user.");
-            return res.status(403).json({ error: "Forbidden. You are not allowed to access these patients." });
+      const { clinicianId } = req.params;
+      const { age, indication, page = 1, limit = 10 } = req.query;
+  
+      // RBAC: Ensure the clinician can only access their own patients.
+      console.log("User UID from Token:", req.user.uid);
+      console.log("Requested Clinician ID:", clinicianId);
+      if (req.user.uid !== clinicianId) {
+        console.log("❌ Clinician ID does not match authenticated user.");
+        return res.status(403).json({ error: "Forbidden. You are not allowed to access these patients." });
+      }
+      console.log("✅ Clinician ID matches authenticated user. Proceeding...");
+  
+      // Build filters array
+      const filters = [
+        {
+          fieldFilter: {
+            field: { fieldPath: "clinicianId" },
+            op: "EQUAL",
+            value: { stringValue: clinicianId }
+          }
         }
-        console.log("✅ Clinician ID matches authenticated user. Proceeding...");
-
-
-        // Firestore Query to filter patients by clinicianId
-        const firestoreQuery = {
-            structuredQuery: {
-                from: [{ collectionId: "patients" }],
-                where: {
-                    fieldFilter: {
-                        field: { fieldPath: "clinicianId" },
-                        op: "EQUAL",
-                        value: { stringValue: clinicianId }
-                    }
-                },
-                limit: parseInt(limit)
-            }
-        };
-
-        // Add additional filters if provided
-        if (age) {
-            firestoreQuery.structuredQuery.where = {
-                compositeFilter: {
-                    op: "AND",
-                    filters: [
-                        firestoreQuery.structuredQuery.where,
-                        {
-                            fieldFilter: {
-                                field: { fieldPath: "age" },
-                                op: "EQUAL",
-                                value: { integerValue: parseInt(age) }
-                            }
-                        }
-                    ]
-                }
-            };
+      ];
+  
+      if (age) {
+        filters.push({
+          fieldFilter: {
+            field: { fieldPath: "age" },
+            op: "EQUAL",
+            value: { integerValue: parseInt(age.toString()) }
+          }
+        });
+      }
+  
+      if (indication) {
+        filters.push({
+          fieldFilter: {
+            field: { fieldPath: "indication" },
+            op: "EQUAL",
+            value: { stringValue: indication.toString() }
+          }
+        });
+      }
+  
+      // Determine the "where" clause based on the number of filters
+      let whereClause;
+      if (filters.length === 1) {
+        whereClause = filters[0];
+      } else {
+        whereClause = { compositeFilter: { op: "AND", filters: filters } };
+      }
+  
+      // Build the structured query
+      const structuredQuery = {
+        from: [{ collectionId: "patients" }],
+        where: whereClause,
+        limit: parseInt(limit.toString())
+      };
+  
+      console.log("Structured Query:", JSON.stringify(structuredQuery, null, 2));
+  
+      const firestoreQuery = { structuredQuery };
+  
+      // Make Firestore API request using axios
+      const response = await axios.post(
+        `${FIRESTORE_BASE_URL}:runQuery`,
+        firestoreQuery,
+        {
+          headers: {
+            "Authorization": `Bearer ${req.token}`,
+            "Content-Type": "application/json"
+          }
         }
-
-        if (indication) {
-            firestoreQuery.structuredQuery.where = {
-                compositeFilter: {
-                    op: "AND",
-                    filters: [
-                        firestoreQuery.structuredQuery.where,
-                        {
-                            fieldFilter: {
-                                field: { fieldPath: "indication" },
-                                op: "EQUAL",
-                                value: { stringValue: indication }
-                            }
-                        }
-                    ]
-                }
-            };
-        }
-
-        // Make Firestore API request
-        const response = await axios.post(
-            `${FIRESTORE_BASE_URL}:runQuery`,
-            firestoreQuery,
-            {
-                headers: {
-                    "Authorization": `Bearer ${req.token}`,
-                    "Content-Type": "application/json"
-                }
-            }
-        );
-
-        // Parse Firestore response
-        const patients = response.data
-            .filter(doc => doc.document) // Ensure only valid documents are processed
-            .map(doc => {
-                const data = doc.document.fields;
-                return {
-                    patientId: doc.document.name.split("/").pop(),
-                    name: data.name?.stringValue,
-                    age: data.age?.integerValue ?? null,
-                    height: data.height?.integerValue ?? null,
-                    weight: data.weight?.integerValue ?? null,
-                    indication: data.indication?.stringValue ?? null,
-                    originOfPain: data.originOfPain?.stringValue ?? null
-                };
-            });
-
-        return res.json({ patients });
+      );
+  
+      // Parse Firestore response
+      const patients = response.data
+        .filter(doc => doc.document) // Only process valid documents
+        .map(doc => {
+          const data = doc.document.fields;
+          return {
+            patientId: doc.document.name.split("/").pop(),
+            name: data.name?.stringValue,
+            age: data.age?.integerValue ?? null,
+            height: data.height?.integerValue ?? null,
+            weight: data.weight?.integerValue ?? null,
+            indication: data.indication?.stringValue ?? null,
+            originOfPain: data.originOfPain?.stringValue ?? null
+          };
+        });
+  
+      return res.json({ patients });
     } catch (error) {
-        console.error("Error fetching patients:", error);
-        return res.status(500).json({ error: "Internal Server Error." });
+      console.error("Error fetching patients:", error);
+      return res.status(500).json({ error: "Internal Server Error." });
     }
-});
+  });
+  
+  
+  
 
 // Start Express Server
 const PORT = process.env.PORT || 3000;
