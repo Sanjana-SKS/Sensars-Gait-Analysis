@@ -153,24 +153,42 @@ body {
 .search-input::placeholder {
   color: #9CB1B7;
 }
-
+/* Improved Search Bar Styles */
 .search-container {
   display: flex;
   align-items: center;
-  background-color: #fff;
-  border: 1px solid #E8EDEC; /* Light gray border from your screenshot */
-  border-radius: 8px;
+  background-color: #f7f7f7;
+  border-radius: 25px;
   padding: 8px 12px;
-  box-sizing: border-box;
-  /* You can set a fixed width or let it shrink/grow:
-     width: 220px;
-  */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.search-container:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 16px;
+  color: #333;
+}
+
+.search-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+  margin-left: 8px;
 }
 
 .search-icon {
-  width: 16px;   /* Adjust to your preference */
-  height: 16px;
-  margin-right: 8px;
+  width: 20px;
+  height: 20px;
+  filter: invert(50%);
 }
 
 /* Add New Patient button */

@@ -1,8 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Patients.css';
 import { db } from '../firebase/firebaseConfig';
-import { signInWithEmailAndPassword, getAuth } from 'firebase/auth';
+import { 
+  signInWithEmailAndPassword, 
+  getAuth, 
+  onAuthStateChanged, 
+  setPersistence, 
+  browserLocalPersistence,
+  signOut  // Import signOut from Firebase
+} from 'firebase/auth';
 import axios from "axios";
 import folderIcon from '../Assets/folder.png';
 import addIcon from '../Assets/plus.png';
@@ -14,18 +21,43 @@ const Patients: React.FC = () => {
   const navigate = useNavigate();
   const authInstance = getAuth();
 
-  // Automatically sign in a test clinician if not already signed in
+  // Local state to store the authenticated user and track if auth state is determined
+  const [user, setUser] = useState<any>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  
+  // useRef to track intentional logout so that auto sign in doesn't trigger
+  const intentionalLogoutRef = useRef(false);
+
+  // Set persistence and listen for auth state changes
   useEffect(() => {
-    if (!authInstance.currentUser) {
-      signInWithEmailAndPassword(authInstance, "clinician#1@gmail.com", "sensarsgait")
-        .then((userCredential) => {
-          console.log("User is signed in:", userCredential.user.uid);
-        })
-        .catch((error) => {
-          console.error("Error signing in:", error);
+    setPersistence(authInstance, browserLocalPersistence)
+      .then(() => {
+        onAuthStateChanged(authInstance, (currentUser) => {
+          if (currentUser) {
+            setUser(currentUser);
+            setAuthChecked(true); // Mark that auth has been checked
+            console.log("User is authenticated:", currentUser.uid);
+          } else {
+            setAuthChecked(true);
+          }
         });
-    }
+      })
+      .catch((error) => {
+        console.error("Error setting persistence:", error);
+      });
   }, [authInstance]);
+
+  // Logout handler: sign out and navigate to login page
+  const handleLogout = async () => {
+    intentionalLogoutRef.current = true;
+    try {
+      await signOut(authInstance);
+      setUser(null);
+      navigate("/login");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
 
   // Modal state and UI toggles
   const [showModal, setShowModal] = useState(false);
@@ -50,22 +82,35 @@ const Patients: React.FC = () => {
   const [patients, setPatients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch patients for the signed-in clinician from your API
+  // Search state: one for live input and one for applied search query
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Debounce search input for smooth filtering
   useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setSearchQuery(searchInput);
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchInput]);
+
+  // Fetch patients only after auth state has been determined
+  useEffect(() => {
+    if (!authChecked) return; // wait until auth is checked
+
     const fetchPatients = async () => {
+      if (!user) {
+        setFormError("User not authenticated.");
+        setLoading(false);
+        return;
+      }
       try {
-        const user = authInstance.currentUser;
-        if (!user) {
-          setFormError("User not authenticated.");
-          setLoading(false);
-          return;
-        }
         const token = await user.getIdToken();
         const clinicianId = user.uid;
-        // Call your API endpoint; it uses a Firestore structured query to return only patients where clinicianId === user.uid.
-        const response = await axios.get(`http://localhost:3000/clinicians/${clinicianId}/patients`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          `http://localhost:3000/clinicians/${clinicianId}/patients`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
         setPatients(response.data.patients);
       } catch (error) {
         console.error("Error fetching patients:", error);
@@ -76,7 +121,12 @@ const Patients: React.FC = () => {
     };
 
     fetchPatients();
-  }, [authInstance]);
+  }, [authChecked, user]);
+
+  // Filter patients based on the applied search query (case-insensitive)
+  const filteredPatients = patients.filter((patient) =>
+    patient.patientId.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Toggle modal and clear form fields when closing
   const toggleModal = () => {
@@ -102,7 +152,8 @@ const Patients: React.FC = () => {
 
   // Generate a random password (optional)
   const generateRandomPassword = (length = 12): string => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~`|}{[]\\:;?><,./-=';
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~`|}{[]\\:;?><,./-=';
     let result = '';
     for (let i = 0; i < length; i++) {
       const randomIndex = Math.floor(Math.random() * chars.length);
@@ -128,7 +179,6 @@ const Patients: React.FC = () => {
       return;
     }
   
-    // Construct the new patient object as expected by Firestore/API
     const newPatient = {
       patientId: patientId.trim(),
       email: `${patientId.trim()}@example.com`,
@@ -138,30 +188,24 @@ const Patients: React.FC = () => {
       weight: weight ? parseInt(weight) : null,
       indication: indication.trim() || "N/A",
       originOfPain: origin.trim() || "Unknown",
-      clinicianId: authInstance.currentUser?.uid,
+      clinicianId: user?.uid,
     };
   
     try {
-      const authToken = localStorage.getItem("token");
-      if (!authToken) {
-        alert("Authentication token not found. Please log in.");
-        return;
-      }
-  
+      const token = await user.getIdToken();
       const response = await axios.post(
-        `http://localhost:3000/clinicians/${authInstance.currentUser?.uid}/patients`,
+        `http://localhost:3000/clinicians/${user?.uid}/patients`,
         newPatient,
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
   
       if (response.status === 201) {
         alert("Patient created successfully!");
-        // Update state to include new patient
         setPatients((prev) => [{ id: response.data.id, ...newPatient, isNew: true }, ...prev]);
         toggleModal();
         navigate("/patients");
@@ -176,13 +220,24 @@ const Patients: React.FC = () => {
 
   return (
     <div className="patients-page">
-      {/* Top Header with Title, Search Bar, and Add New Patient */}
+      {/* Top Header with Title, Search Bar, Add New Patient, and Logout */}
       <div className="patients-header">
         <h1 className="page-title">Patients</h1>
+        <div className="header-actions">
+          <button className="logout-button" onClick={handleLogout}>Logout</button>
+        </div>
         <div className="search-and-add">
           <div className="search-container">
-            <img src={searchIcon} alt="Search" className="search-icon" />
-            <input type="text" placeholder="Search" className="search-input" />
+            <input 
+              type="text" 
+              placeholder="Search by Patient ID" 
+              className="search-input"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+            <button className="search-btn">
+              <img src={searchIcon} alt="Search" className="search-icon" />
+            </button>
           </div>
           <button className="add-patient-button" onClick={toggleModal}>
             <img src={addIcon} alt="Add" className="add-icon" />
@@ -198,10 +253,10 @@ const Patients: React.FC = () => {
         <p className="error-text">{formError}</p>
       ) : (
         <div className="patients-grid">
-          {patients.length === 0 ? (
-            <p>No patients found for this clinician.</p>
+          {filteredPatients.length === 0 ? (
+            <p>No patients found.</p>
           ) : (
-            patients.map((patient) => (
+            filteredPatients.map((patient) => (
               <div className="patient-card" key={patient.id}>
                 <div className="patient-id">
                   <span className="label">Patient Clinical Study ID#: </span>

@@ -124,43 +124,40 @@ app.get("/clinicians/:clinicianId/patients", authenticate, async (req, res) => {
       }
       console.log("✅ Clinician ID matches authenticated user. Proceeding...");
   
-      // Build filters array
-      const filters = [
-        {
-          fieldFilter: {
-            field: { fieldPath: "clinicianId" },
-            op: "EQUAL",
-            value: { stringValue: clinicianId }
-          }
+      // Build base filter for clinicianId.
+      const baseFilter = {
+        fieldFilter: {
+          field: { fieldPath: "clinicianId" },
+          op: "EQUAL",
+          value: { stringValue: clinicianId }
         }
-      ];
+      };
   
-      if (age) {
-        filters.push({
-          fieldFilter: {
-            field: { fieldPath: "age" },
-            op: "EQUAL",
-            value: { integerValue: parseInt(age.toString()) }
-          }
-        });
-      }
-  
-      if (indication) {
-        filters.push({
-          fieldFilter: {
-            field: { fieldPath: "indication" },
-            op: "EQUAL",
-            value: { stringValue: indication.toString() }
-          }
-        });
-      }
-  
-      // Determine the "where" clause based on the number of filters
+      // If additional filters (age or indication) are provided, combine them.
       let whereClause;
-      if (filters.length === 1) {
-        whereClause = filters[0];
-      } else {
+      if (age || indication) {
+        const filters = [baseFilter];
+        if (age) {
+          filters.push({
+            fieldFilter: {
+              field: { fieldPath: "age" },
+              op: "EQUAL",
+              value: { integerValue: parseInt(age.toString()) }
+            }
+          });
+        }
+        if (indication) {
+          filters.push({
+            fieldFilter: {
+              field: { fieldPath: "indication" },
+              op: "EQUAL",
+              value: { stringValue: indication.toString() }
+            }
+          });
+        }
         whereClause = { compositeFilter: { op: "AND", filters: filters } };
+      } else {
+        whereClause = baseFilter;
       }
   
       // Build the structured query
@@ -170,11 +167,11 @@ app.get("/clinicians/:clinicianId/patients", authenticate, async (req, res) => {
         limit: parseInt(limit.toString())
       };
   
-      console.log("Structured Query:", JSON.stringify(structuredQuery, null, 2));
-  
       const firestoreQuery = { structuredQuery };
   
-      // Make Firestore API request using axios
+      console.log("Structured Query:", JSON.stringify(structuredQuery, null, 2));
+  
+      // Make the Firestore REST API request
       const response = await axios.post(
         `${FIRESTORE_BASE_URL}:runQuery`,
         firestoreQuery,
@@ -186,9 +183,9 @@ app.get("/clinicians/:clinicianId/patients", authenticate, async (req, res) => {
         }
       );
   
-      // Parse Firestore response
+      // Parse Firestore response: only process documents that exist.
       const patients = response.data
-        .filter(doc => doc.document) // Only process valid documents
+        .filter(doc => doc.document)
         .map(doc => {
           const data = doc.document.fields;
           return {
@@ -208,6 +205,7 @@ app.get("/clinicians/:clinicianId/patients", authenticate, async (req, res) => {
       return res.status(500).json({ error: "Internal Server Error." });
     }
   });
+  
   
   
   
